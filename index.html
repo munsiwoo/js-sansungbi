@@ -1,0 +1,157 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>sansungbi</title>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<!-- made by munsiwoo -->
+	<!-- javascript : sansungbi -->
+	<!-- js 산성비 -->
+</head>
+<body>
+
+	<div id="canvas" style="width:300px;height:200px;"></div><hr>
+	<input id="text" placeholder="text" onkeypress="keydown(event.keyCode)">
+	<button onclick="keydown(13)">인증</button><br>
+	<b id="point"></b> / <b id="heart"></b>
+
+	<script type="text/javascript">
+		var canvasWidth = 300;
+		var canvasHeigth = 180;
+		var goal, keyword = [];
+
+		function getQuerystring(paramName) {
+		    var _tempUrl = window.location.search.substring(1);
+		    var _tempArray = _tempUrl.split('&');
+
+		    for (var i = 0; _tempArray.length; i++) {
+		        var _keyValuePair = _tempArray[i].split('=');
+		        if (_keyValuePair[0] == paramName) {
+		            return _keyValuePair[1];
+		        }
+		    }
+		}
+
+		try{ var level = getQuerystring("level"); }
+		catch (exception) { location.href='?level=1'; }
+
+		if(level == 1){
+			alert("스테이지 : 1 [목표 포인트 : 5]");
+			keyword = ['apple','banana','kiwi','tomato','coconut','mango'];
+			goal = 5;
+		}
+		else if(level == 2){
+			alert("스테이지 : 2 [목표 포인트 : 10]");
+			keyword = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n'];
+			goal = 10;
+		}
+
+		var keyword_cnt = 0;
+		var point = 0; // 포인트
+		var heart = 5; // 목숨
+
+		document.getElementById('point').innerHTML = "포인트 : " + point
+		document.getElementById('heart').innerHTML = "목숨 : " + heart
+
+		function gamewin(){
+			clearInterval(setInterval1);
+			clearInterval(setInterval2);
+			if(level == 2){
+				document.body.innerHTML = "<h1>축하드립니다! You are Winner! XD</h1>\
+				<h3>made by munsiwoo</h3><a href='http://github.com/munsiwoo/sansungbi'>github</a>";
+			}
+			else {
+				document.body.innerHTML = "<h1>성공!</h1><br><a href='?level="+(parseInt(level)+1)+"'>다음 레벨</a>";
+			}
+		}
+
+		function remove_node(pRemoveEle)
+		{
+		   var vRemove = document.getElementById(pRemoveEle); 
+		   var vParent = vRemove.parentNode;
+		   vParent.removeChild(vRemove);
+		   vRemove = null;
+		}
+
+		function gameover(){
+			clearInterval(setInterval1);
+			clearInterval(setInterval2);
+			document.body.innerHTML = "<h1>게임 오버 :(</h1><button onclick='location.reload()'><h3>다시하기</h3></button>";
+		}
+
+		function random_speed(maxSpeed){
+            return parseInt(Math.random() * maxSpeed) + 1;
+        }
+
+		function random_width(){
+			return parseInt(Math.random() * 300) + 1;
+		}
+
+		function keyword_rain(){
+			this.y = 0;
+			this.speed = random_speed(2);
+
+			this.node = document.createElement('h5');
+			this.node.id = keyword[keyword_cnt];
+			this.node.innerHTML = keyword[keyword_cnt++];
+
+			if(keyword_cnt >= keyword.length){
+				clearInterval(setInterval1);
+			}
+
+			this.node.style.position = 'absolute';
+			this.node.style.left = random_width();
+
+			document.getElementById('canvas').appendChild(this.node);
+
+			keyword_rain.prototype.move = function(){
+				if(this.y > canvasHeigth){ // 땅에 닿았을 때
+					$(this.node).empty(); // 태그 삭제 (jQuery)
+					this.y = this.speed = 0;
+					keyword.splice(keyword.indexOf(this.node.id), 1);
+					keyword_cnt -= 1;
+					heart -= 1;
+					document.getElementById('heart').innerHTML = "목숨 : "+heart
+					if(heart < 1) gameover();
+					return;
+				}
+				this.y += this.speed;
+				this.node.style.top = this.y + 'px';
+			}
+		}
+
+		function keydown(keyCode){
+			if(keyCode == 13){
+				var text = document.getElementById('text'); // 사용자 입력폼
+				
+				if(keyword.indexOf(text.value) != -1){ // 입력한 값이 키워드에 있으면 실행
+					remove_node(text.value);
+					for(var i in game){
+						if(game[i]['node'].id == text.value){
+							game[i]['y'] = 0;
+							game[i]['speed'] = 0;
+						}
+					}
+					keyword.splice(keyword.indexOf(text.value), 1);
+					keyword_cnt -= 1;
+					point += 1;
+					document.getElementById('point').innerHTML = "포인트 : " + point;
+				}
+				text.value = "";
+				if(point >= goal) gamewin();
+			}
+			return;
+		}
+		
+		var game = [];
+
+		var setInterval1 = setInterval(function(){
+			game.push(new keyword_rain());
+		}, 1000); // 1초마다 키워드 생성
+
+		var setInterval2 = setInterval(function(){
+			for(var x in game){ game[x].move(); }
+		}, 15); // 키워드 움직이기
+
+	</script>
+</body>
+</html>
