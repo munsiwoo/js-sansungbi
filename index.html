@@ -179,8 +179,8 @@
 					document.getElementById('point').innerHTML = "포인트 : " + point;
 				}
 				text.value = "";
-				if(point >= goal) gamewin();
-				if(keyword.length == 0) gameover(2);
+				if(point >= goal) { gamewin(); return; }
+				if(keyword.length == 0) { gameover(2); return; }
 			}
 			return;
 		}
